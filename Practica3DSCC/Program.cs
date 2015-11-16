@@ -27,7 +27,7 @@ namespace Practica3DSCC
         private GHI.Glide.Display.Window camaraWindow;
         private Button btn_start;
         private Button btn_stop;
-
+        private SensorProximidad sensor;
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
         {
@@ -44,7 +44,7 @@ namespace Practica3DSCC
                 timer.Start();
             *******************************************************************************************/
 
-
+            sensor = new SensorProximidad(extender);
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
 
@@ -66,11 +66,15 @@ namespace Practica3DSCC
         void btn_stop_TapEvent(object sender)
         {
             Debug.Print("Stop");
+            sensor.StopSampling();
         }
 
         void btn_start_TapEvent(object sender)
         {
             Debug.Print("Start");
+            sensor.StartSampling();
+            
+
         }
     }
 }
