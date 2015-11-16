@@ -21,34 +21,50 @@ namespace Practica3DSCC
     {
         //EVENTO ObjectOff: Disparar este evento cuando el sensor detecte la ausencia del objeto
         public event ObjectOffEventHandler ObjectOff;
-
+        enum State { ObjectOFF, ObjectON };
         //EVENTO ObjectOn: Disparar este evento cuando el sensor detecte la presencia de un objeto
         public event ObjectOnEventHandler ObjectOn;
         private GT.Timer timer;
         private GT.SocketInterfaces.AnalogInput input;
         private GT.SocketInterfaces.DigitalOutput output;
+        private static double voltage;
         
         public SensorProximidad(GTM.GHIElectronics.Extender extender)
         {
             //TODO: Inicializar el sensor
             input = extender.CreateAnalogInput(GT.Socket.Pin.Three); 
-            output = extender.CreateDigitalOutput(GT.Socket.Pin.Five, false);
+            output = extender.CreateDigitalOutput(GT.Socket.Pin.Five, true);
             timer = new GT.Timer(1000);
             timer.Tick += new GT.Timer.TickEventHandler(timer_Tick);
             timer.Start();
+
               
         }
 
+
+
         private void timer_Tick(GT.Timer timer)
         {
-            Debug.Print("voltage: " +output.Read());
-            
+            Debug.Print("voltage: " +input.ReadVoltage());
+            voltage = input.ReadVoltage();
+            if(voltage<=3.3 && voltage>=3)
+            {
+                ObjectOff();
+                Debug.Print("OBJETO FUERA");
+            }
+            else
+            {
+                ObjectOn();
+                Debug.Print("OBJETO PRESENTE");
+            }
         }
 
         public void StartSampling()
         {
             //TODO: Activar el LED infrarrojo y empezar a muestrear el foto-transistor
             output.Write(false);
+            
+            
             
         }
 
@@ -57,6 +73,10 @@ namespace Practica3DSCC
             //TODO: Desactivar el LED infrarrojo y detener el muestreo del foto-transistor
             output.Write(true);
             
+            
+            
         }
+
+
     }
 }

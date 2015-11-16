@@ -45,6 +45,8 @@ namespace Practica3DSCC
             *******************************************************************************************/
 
             sensor = new SensorProximidad(extender);
+            sensor.ObjectOn += sensor_ObjectOn;
+            sensor.ObjectOff += sensor_ObjectOff;
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
 
@@ -62,6 +64,18 @@ namespace Practica3DSCC
             //Selecciona mainWindow como la ventana de inicio
             Glide.MainWindow = controlWindow;
         }
+
+        void sensor_ObjectOff()
+        {
+            camera.StopStreaming();
+        }
+
+        void sensor_ObjectOn()
+        {
+            camera.StartStreaming();
+        }
+
+
 
         void btn_stop_TapEvent(object sender)
         {
