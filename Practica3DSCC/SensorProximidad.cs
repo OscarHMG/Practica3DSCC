@@ -21,7 +21,7 @@ namespace Practica3DSCC
     {
         //EVENTO ObjectOff: Disparar este evento cuando el sensor detecte la ausencia del objeto
         public event ObjectOffEventHandler ObjectOff;
-        enum State { ObjectOFF, ObjectON };
+        Boolean singleton = false;
         //EVENTO ObjectOn: Disparar este evento cuando el sensor detecte la presencia de un objeto
         public event ObjectOnEventHandler ObjectOn;
         private GT.Timer timer;
@@ -33,10 +33,10 @@ namespace Practica3DSCC
         {
             //TODO: Inicializar el sensor
             input = extender.CreateAnalogInput(GT.Socket.Pin.Three); 
-            output = extender.CreateDigitalOutput(GT.Socket.Pin.Five, true);
+            output = extender.CreateDigitalOutput(GT.Socket.Pin.Five, false);
             timer = new GT.Timer(1000);
             timer.Tick += new GT.Timer.TickEventHandler(timer_Tick);
-            timer.Start();
+            //timer.Start();
 
               
         }
@@ -47,15 +47,23 @@ namespace Practica3DSCC
         {
             Debug.Print("voltage: " +input.ReadVoltage());
             voltage = input.ReadVoltage();
-            if(voltage<=3.3 && voltage>=3)
+            if(voltage<=3.3 && voltage>=3) //false
             {
-                ObjectOff();
-                Debug.Print("OBJETO FUERA");
+                if (!singleton) { 
+                    ObjectOff();
+                    Debug.Print("OBJETO FUERA");
+                    singleton=true;
+                }
             }
-            else
+            else //true
             {
-                ObjectOn();
-                Debug.Print("OBJETO PRESENTE");
+                if (singleton)
+                {
+                    ObjectOn();
+                    Debug.Print("OBJETO PRESENTE");
+                    singleton = false;
+                }
+                
             }
         }
 
@@ -63,7 +71,7 @@ namespace Practica3DSCC
         {
             //TODO: Activar el LED infrarrojo y empezar a muestrear el foto-transistor
             output.Write(false);
-            
+            timer.Start();
             
             
         }
@@ -72,7 +80,7 @@ namespace Practica3DSCC
         {
             //TODO: Desactivar el LED infrarrojo y detener el muestreo del foto-transistor
             output.Write(true);
-            
+            timer.Stop();
             
             
         }

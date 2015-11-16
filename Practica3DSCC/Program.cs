@@ -28,6 +28,9 @@ namespace Practica3DSCC
         private Button btn_start;
         private Button btn_stop;
         private SensorProximidad sensor;
+        enum Estado { SENSOR_OFF, SENSOR_ON, MONITOREO };
+         private Estado estado;
+         private bool bandera = false;
         // This method is run when the mainboard is powered up or reset.   
         void ProgramStarted()
         {
@@ -47,6 +50,7 @@ namespace Practica3DSCC
             sensor = new SensorProximidad(extender);
             sensor.ObjectOn += sensor_ObjectOn;
             sensor.ObjectOff += sensor_ObjectOff;
+            estado = Estado.SENSOR_OFF;
             // Use Debug.Print to show messages in Visual Studio's "Output" window during debugging.
             Debug.Print("Program Started");
 
@@ -60,35 +64,63 @@ namespace Practica3DSCC
             btn_stop = (Button)controlWindow.GetChildByName("stop");
             btn_start.TapEvent += btn_start_TapEvent;
             btn_stop.TapEvent += btn_stop_TapEvent;
+            camera.BitmapStreamed += camera_BitmapStreamed;
 
             //Selecciona mainWindow como la ventana de inicio
             Glide.MainWindow = controlWindow;
         }
 
+        void camera_BitmapStreamed(Camera sender, Bitmap e)
+        {
+            displayT35.SimpleGraphics.DisplayImage(e, 0, 0);
+        }
+
         void sensor_ObjectOff()
         {
             camera.StopStreaming();
+            cambiarEstado(Estado.SENSOR_ON);
         }
 
         void sensor_ObjectOn()
         {
-            camera.StartStreaming();
+             cambiarEstado(Estado.MONITOREO);
         }
-
 
 
         void btn_stop_TapEvent(object sender)
         {
             Debug.Print("Stop");
             sensor.StopSampling();
+            cambiarEstado(Estado.SENSOR_OFF);
         }
 
         void btn_start_TapEvent(object sender)
         {
             Debug.Print("Start");
             sensor.StartSampling();
-            
+            cambiarEstado(Estado.SENSOR_ON);
+          
 
+        }
+        private void cambiarEstado(Estado es){
+            estado = es;
+            TextBlock text = (TextBlock)controlWindow.GetChildByName("status");
+            switch (es) { 
+                case Estado.SENSOR_OFF:
+                     text.Text = "Monitoreo OFF";
+                    break;
+                case Estado.SENSOR_ON:
+                  
+                    text.Text = "Monitoreo ON";
+                    Glide.MainWindow = controlWindow;
+                    GlideTouch.Initialize();
+
+                    break;
+                case Estado.MONITOREO:
+                    Glide.MainWindow = camaraWindow;
+                    camera.StartStreaming();
+                    break;
+            }
         }
     }
 }
